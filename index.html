@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="generator" content="Hugo 0.88.1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/github.min.css">
+	<link rel="stylesheet" href="css/custom.css">
+	<link rel="stylesheet" href="css/normalize.css">
+
+	<title>EmoInstruct-TTS</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+
+	<style>
+    .image-container {
+        display: flex; /* 使用flex布局使内容并排 */
+        justify-content: center; /* 水平居中显示 */
+        align-items: center; /* 垂直居中显示 */
+        margin-bottom: 20px; /* 下边距 */
+    }
+    .image-container img {
+        margin-right: 20px; /* 图片之间的间隔 */
+        width: 600px; /* 图片宽度 */
+    }
+    .image-container img:last-child {
+        margin-right: 0; /* 最后一张图片不需要右边距 */
+    }
+    .caption {
+        text-align: center; /* 标题居中 */
+        font-size: 16px; /* 字体大小 */
+    }
+	</style>
+
+</head>
+
+
+<body data-new-gr-c-s-check-loaded="14.1091.0" data-gr-ext-installed="">
+
+<div class="container" >
+<header role="banner">
+</header>
+<main role="main">
+<article itemscope itemtype="https://schema.org/BlogPosting">
+
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+	<div class="text-center">
+	<h2>EmoInstruct-TTS: Dual-Path Instruction-Guided Emotional Speech Synthesis
+</h2>
+	</div>
+	<p><b>Abstract:</b>
+		Controllable speech synthesis driven by natural language instructions has emerged as a promising paradigm for flexible and user-friendly control of speech attributes. However, existing instruction-based approaches typically rely on coarse-grained emotion categories and struggle to capture subtle emotional nuances and intensity variations.
+		
+		In this paper, we propose EmoInstruct-TTS, a dual-path instruction-guided framework for fine-grained emotional speech synthesis. The proposed system jointly leverages linguistic semantics and explicit emotion embeddings to achieve robust and interpretable emotional control. At its core, we introduce Emotion2embed, a semantic–acoustic emotion representation that models 48 emotional states, including 27 fine-grained emotion categories and 21 emotion–intensity combinations derived from seven major emotions. To generate Emotion2embed from natural language instructions, we further propose an Instruction-Conditioned Emotion Flow Model (ICE-Flow) based on conditional flow matching. The generated emotion embeddings are integrated into an LLM-based synthesis pipeline to explicitly regulate emotional expression. Extensive experiments demonstrate that EmoInstruct-TTS consistently outperforms strong baselines in both speech naturalness and emotional controllability, particularly in modeling fine-grained emotion intensity variations.
+
+	<div class="image-container">
+		<div>
+			<img src="pics/overview.png" style="width: 100%; max-width: 1000px; height: auto;">
+			<p class="caption">The dual-path instruction-guided synthesis pipeline of EmoInstruct-TTS</p>
+		</div>
+	</div>
+</p>
+	</p>
+
+	<p>
+	<b>Contents</b>
+		<ul><li><a href="#7 Primary Emotions with Intensity Levels for Men">7 Primary Emotions with Intensity Levels for Men</a></li>
+		<li><a href="#7 Primary Emotions with Intensity Levels for Women">7 Primary Emotions with Intensity Levels for Women</a></li>
+		<li><a href="#Some Other Emotions for Men">Some Other Emotions for Men</a></li>
+		<li><a href="#Some Other Emotions for Women">Some Other Emotions for Women</a></li>
+
+	</p>
+
+</div>
+
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+	<h2 id="7 Primary Emotions with Intensity Levels for Men" style="text-align: center;">7 Primary Emotions with Intensity Levels for Men </h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2" style="table-layout: fixed; width: 200%;">
+				<thead>
+					<tr>
+					  <!-- Emotion 和 Text 与模型主标题在同一行 -->
+					  <th rowspan="2" style="vertical-align: middle;text-align: center">Emotion</th>
+					  <th rowspan="2" style="vertical-align: middle;text-align: center">Text</th>
+					  <!-- CosyVoice 2.0 主标题 -->
+					  <th colspan="3" style="vertical-align: middle;text-align: center">EmoInstruct-TTS</th>
+					  <!-- CosyVoice 3.0 主标题 -->
+					  <th colspan="3" style="vertical-align: middle;text-align: center">CosyVoice 2.0</th>
+					  <!-- EmoInstruct-TTS 主标题 -->
+					  <th colspan="3" style="vertical-align: middle;text-align: center">CosyVoice 3.0</th>
+					</tr>
+					<tr>
+					  <!-- 这里是第二行：子列标题 -->
+					  <th style="vertical-align: middle;text-align: center">Slightly</th>
+					  <th style="vertical-align: middle;text-align: center">Normal</th>
+					  <th style="vertical-align: middle;text-align: center">Very</th>
+					  <th style="vertical-align: middle;text-align: center">Slightly</th>
+					  <th style="vertical-align: middle;text-align: center">Normal</th>
+					  <th style="vertical-align: middle;text-align: center">Very</th>
+					  <th style="vertical-align: middle;text-align: center">Slightly</th>
+					  <th style="vertical-align: middle;text-align: center">Normal</th>
+					  <th style="vertical-align: middle;text-align: center">Very</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- 第一行 -->
+					<tr>
+					  <td rowspan="3" style="vertical-align: middle;text-align: center">Happy</td>
+					  <td style="vertical-align: middle;text-align: center">嘿嘿，知道好处了吧，以后也要放心让我出去玩哟！</td>
+
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					<!-- 第二行 -->
+					<tr>
+					  <!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					  <td style="vertical-align: middle;text-align: center">好哎，就知道我哥最好了，让我查查附近有什么好吃的！</td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					<!-- 第三行 -->
+					<tr>
+					  <!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					  <td style="vertical-align: middle;text-align: center">哎呀，舒展一下真畅快，我现在状态非常好哦！</td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					<!-- 第四行 -->
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Angry</td>
+						<td style="vertical-align: middle;text-align: center">居然被小孩子看不起了，可恶，你们给我等着！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  </tr>
+					<!-- 第五行 -->
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">你真是个骗子，在这方面，跟你那疯子哥哥没什么两样！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  </tr>
+					<!-- 第六行 -->
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">你也参加过吗？这个俱乐部太不讲武德了！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Anxious</td>
+						<td style="vertical-align: middle;text-align: center">太慢了，效率太低了，这是不可能在二十四小时内完成的，也许要花上几年，几个月。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">鉴于我们时间紧张，请允许我略去无用的细节，只用最简单的比喻来解释。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">谁看到我的望远镜了吗？把它递给我一下，好吗。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Sad</td>
+						<td style="vertical-align: middle;text-align: center">但是因为忙，我和她见面的机会也越来越少了。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">我不明白，我无法理解。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">所以我帮不上大家的忙了吗？</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Surprised</td>
+						<td style="vertical-align: middle;text-align: center">脉搏很微弱，怎么会？明明应该还在急救时限内的！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">空降什么的？好像只有电影里才会用到吧！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">不敢相信？这么简单的题就把我直接送出去了！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Fondness</td>
+						<td style="vertical-align: middle;text-align: center">和我争夺制空权？嗯，很有勇气！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">这时候的风最舒服了，让我们起飞吧！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">坚韧、勇敢、不轻言放弃，做的真棒呀！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Fear</td>
+						<td style="vertical-align: middle;text-align: center">你听到了吗？我……我怎么感觉好像听到有人在哀嚎。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">快看，那边飘动的影子，该……该不会是刺客吧！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">你……你这是要干嘛？鬼鬼祟祟的，吓人。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\很害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_clap\非常害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\很害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy2\非常害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\很害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_man_cosy3\非常害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+				</tbody>
+				</table>
+				<tbody>
+
+				</tbody>
+			</table>
+		</div>
+</div>
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+	<h2 id="7 Primary Emotions with Intensity Levels for Women" style="text-align: center;">7 Primary Emotions with Intensity Levels for Women </h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2" style="table-layout: fixed; width: 200%;">
+				<thead>
+					<tr>
+					  <!-- Emotion 和 Text 与模型主标题在同一行 -->
+					  <th rowspan="2" style="vertical-align: middle;text-align: center">Emotion</th>
+					  <th rowspan="2" style="vertical-align: middle;text-align: center">Text</th>
+					  <!-- CosyVoice 2.0 主标题 -->
+					  <th colspan="3" style="vertical-align: middle;text-align: center">EmoInstruct-TTS</th>
+					  <!-- CosyVoice 3.0 主标题 -->
+					  <th colspan="3" style="vertical-align: middle;text-align: center">CosyVoice 2.0</th>
+					  <!-- EmoInstruct-TTS 主标题 -->
+					  <th colspan="3" style="vertical-align: middle;text-align: center">CosyVoice 3.0</th>
+					</tr>
+					<tr>
+					  <!-- 这里是第二行：子列标题 -->
+					  <th style="vertical-align: middle;text-align: center">Slightly</th>
+					  <th style="vertical-align: middle;text-align: center">Normal</th>
+					  <th style="vertical-align: middle;text-align: center">Very</th>
+					  <th style="vertical-align: middle;text-align: center">Slightly</th>
+					  <th style="vertical-align: middle;text-align: center">Normal</th>
+					  <th style="vertical-align: middle;text-align: center">Very</th>
+					  <th style="vertical-align: middle;text-align: center">Slightly</th>
+					  <th style="vertical-align: middle;text-align: center">Normal</th>
+					  <th style="vertical-align: middle;text-align: center">Very</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!-- 第一行 -->
+					<tr>
+					  <td rowspan="3" style="vertical-align: middle;text-align: center">Happy</td>
+					  <td style="vertical-align: middle;text-align: center">嘿嘿，知道好处了吧，以后也要放心让我出去玩哟！</td>
+
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常高兴\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					<!-- 第二行 -->
+					<tr>
+					  <!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					  <td style="vertical-align: middle;text-align: center">好哎，就知道我哥最好了，让我查查附近有什么好吃的！</td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常高兴\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					<!-- 第三行 -->
+					<tr>
+					  <!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					  <td style="vertical-align: middle;text-align: center">哎呀，舒展一下真畅快，我现在状态非常好哦！</td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  <td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常高兴\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					<!-- 第四行 -->
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Angry</td>
+						<td style="vertical-align: middle;text-align: center">居然被小孩子看不起了，可恶，你们给我等着！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常愤怒\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  </tr>
+					<!-- 第五行 -->
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">你真是个骗子，在这方面，跟你那疯子哥哥没什么两样！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常愤怒\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					  </tr>
+					<!-- 第六行 -->
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">你也参加过吗？这个俱乐部太不讲武德了！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常愤怒\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Anxious</td>
+						<td style="vertical-align: middle;text-align: center">太慢了，效率太低了，这是不可能在二十四小时内完成的，也许要花上几年，几个月。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常焦虑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">鉴于我们时间紧张，请允许我略去无用的细节，只用最简单的比喻来解释。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常焦虑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">谁看到我的望远镜了吗？把它递给我一下，好吗。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常焦虑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Sad</td>
+						<td style="vertical-align: middle;text-align: center">但是因为忙，我和她见面的机会也越来越少了。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常悲伤\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">我不明白，我无法理解。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常悲伤\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">所以我帮不上大家的忙了吗？</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常悲伤\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Surprised</td>
+						<td style="vertical-align: middle;text-align: center">脉搏很微弱，怎么会？明明应该还在急救时限内的！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常惊讶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">空降什么的？好像只有电影里才会用到吧！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常惊讶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">不敢相信？这么简单的题就把我直接送出去了！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常惊讶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Fondness</td>
+						<td style="vertical-align: middle;text-align: center">和我争夺制空权？嗯，很有勇气！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常喜爱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">这时候的风最舒服了，让我们起飞吧！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常喜爱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">坚韧、勇敢、不轻言放弃，做的真棒呀！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常喜爱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<td rowspan="3" style="vertical-align: middle;text-align: center">Fear</td>
+						<td style="vertical-align: middle;text-align: center">你听到了吗？我……我怎么感觉好像听到有人在哀嚎。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常害怕\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">快看，那边飘动的影子，该……该不会是刺客吧！</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常害怕\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+					
+					<tr>
+						<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+						<td style="vertical-align: middle;text-align: center">你……你这是要干嘛？鬼鬼祟祟的，吓人。</td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\很害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_clap\非常害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+  
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\很害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy2\非常害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\很害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+						<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_level_woman_cosy3\非常害怕\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					</tr>
+				</tbody>
+				</table>
+				<tbody>
+
+				</tbody>
+			</table>
+		</div>
+</div>
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+	<h2 id="Some Other Emotions for Men" style="text-align: center;">Some Other Emotions for Men</h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2">
+				<thead>
+				<tr>
+						<th style="vertical-align : middle;text-align: center">Emotion</th>
+						<th style="vertical-align : middle;text-align: center">Text</th>
+						<th style="vertical-align : middle;text-align: center">EmoInstruct-TTS</th>
+						<th style="vertical-align : middle;text-align: center">CosyVoice 2.0</th>
+						<th style="vertical-align : middle;text-align: center">CosyVoice 3.0</th>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Arrogant</td>
+					<td style="vertical-align: middle;text-align: center">嗯，长官，赶快联络你们的人吧，我们老大的耐心可是很有限的。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\傲慢\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\傲慢\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\傲慢\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">行了，流程我不想再听一遍，直接告诉我你们能不能解决。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\傲慢\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\傲慢\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\傲慢\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">这种情况你自己处理不了，就尽快叫能做主的人来吧，我没时间等。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\傲慢\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\傲慢\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\傲慢\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Sincere</td>
+					<td style="vertical-align: middle;text-align: center">我不是临时起意才说这些，而是反复想过之后，觉得有必要把真实想法告诉你。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\诚恳\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\诚恳\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\诚恳\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">如果有哪里处理得不够妥当，那是我的问题，我愿意为此承担责任。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\诚恳\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\诚恳\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\诚恳\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我说的每一句话都没有夸张，只是希望事情能在清楚和尊重的前提下继续。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\诚恳\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\诚恳\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\诚恳\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Grateful</td>
+					<td style="vertical-align: middle;text-align: center">谢谢你，我工作的时候呢，不习惯吃东西的。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\感激\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\感激\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\感激\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">要没有你的支持，爸爸的工作能干的这么好吗？这是爸爸说实话，真的。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\感激\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\感激\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\感激\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">老师，如果没有您的话，我也不可能会有这样的企业。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\感激\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\感激\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\感激\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Excited</td>
+					<td style="vertical-align: middle;text-align: center">哎哟，我的妈呀，真是暴珍天物啊。那个松饼已经涂满了蜂密蛋糕，插上了蜡烛，红烧肉，掺满了卤汁，一天一口都没吃。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\激动\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\激动\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\激动\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">对我来说，这一刻比你想象得要重要得多，所以我才会这么情绪化。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\激动\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\激动\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\激动\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">康熙的意思，你赶紧过来把他挪开，没想到看爹的比他脾气还大，干嘛呢？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\激动\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\激动\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\激动\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Confused</td>
+					<td style="vertical-align: middle;text-align: center">得罪你的是我，跟韩志一点关系都没有，你干嘛？老是针对他。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\困惑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\困惑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\困惑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">怎么这么臭？是我跟您说，我这是后半夜就熬出来了。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\困惑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\困惑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\困惑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我就不明白他这手举这么高，是打算干嘛呀？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\困惑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\困惑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\困惑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Conquettish</td>
+					<td style="vertical-align: middle;text-align: center">我自己也挺尴尬的，人家魏总执意邀请，我也不好拒绝嘛。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\撒娇\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\撒娇\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\撒娇\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">人家真的不是故意惹你生气的啦，只是太在乎你了，所以才会有点小情绪，你就原谅我一次嘛，好不好。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\撒娇\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\撒娇\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\撒娇\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我明明已经很乖很听话了，可你不看我一眼，我心里就酸酸的，好像被全世界冷落了一样。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\撒娇\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\撒娇\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\撒娇\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Pained</td>
+					<td style="vertical-align: middle;text-align: center">不对不对，怎么连呼吸的时候胸口都在疼，这是撞到哪儿了？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\痛苦\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\痛苦\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\痛苦\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">刚才那一下力气也太大了吧，感觉整个人都懵了一下。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\痛苦\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\痛苦\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\痛苦\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">哎呀，我怎么觉得我的头还有点晕呢？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\痛苦\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\痛苦\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\痛苦\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Disgusted</td>
+					<td style="vertical-align: middle;text-align: center">你们为什么会非提他不可，难道我们之间就没有什么可以提的吗？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\厌恶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\厌恶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\厌恶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我不喜欢他，看你的眼神，不喜欢他挽着你的手，更不喜欢你，替他说话。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\厌恶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\厌恶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\厌恶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">一个做过牢的诈欺犯，一个不断骗人的骗子，还故意挑选两个男人之间的对抗。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\厌恶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\厌恶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\厌恶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Nostalgic</td>
+					<td style="vertical-align: middle;text-align: center">小海好久不见，我想你想的都做梦了。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\怀念\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\怀念\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\怀念\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">那里的田埂是不是还留着熟悉的欢笑？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\怀念\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\怀念\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\怀念\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我依稀看见小孙孙牵着您的手走过倒浪的背影。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\怀念\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\怀念\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\怀念\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Relieved</td>
+					<td style="vertical-align: middle;text-align: center">刚意识到这件事真的不需要我再继续扛着的时候，我整个人都松了一下。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\解脱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\解脱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\解脱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">之前一直没察觉，其实身体早就累了，只是心里那根弦一直绷着，不敢放。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\解脱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\解脱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\解脱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">不是失落，是那种不用再反复盘算，不用再担心下一步的空。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_clap\解脱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy2\解脱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_man_cosy3\解脱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				</thead>
+				<tbody>
+
+				</tbody>
+			</table>
+		</div>
+</div>
+
+<div class="container pt-5 mt-5 shadow-lg p-5 mb-5 bg-white rounded">
+	<h2 id="Some Other Emotions for Women" style="text-align: center;">Some Other Emotions for Women </h2>
+		<div class="table-responsive pt-3">
+			<table class="table table-hover pt-2">
+				<thead>
+				<tr>
+						<th style="vertical-align : middle;text-align: center">Emotion</th>
+						<th style="vertical-align : middle;text-align: center">Text</th>
+						<th style="vertical-align : middle;text-align: center">EmoInstruct-TTS</th>
+						<th style="vertical-align : middle;text-align: center">CosyVoice 2.0</th>
+						<th style="vertical-align : middle;text-align: center">CosyVoice 3.0</th>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Arrogant</td>
+					<td style="vertical-align: middle;text-align: center">嗯，长官，赶快联络你们的人吧，我们老大的耐心可是很有限的。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\傲慢\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\傲慢\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\傲慢\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">行了，流程我不想再听一遍，直接告诉我你们能不能解决。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\傲慢\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\傲慢\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\傲慢\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">这种情况你自己处理不了，就尽快叫能做主的人来吧，我没时间等。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\傲慢\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\傲慢\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\傲慢\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Sincere</td>
+					<td style="vertical-align: middle;text-align: center">我不是临时起意才说这些，而是反复想过之后，觉得有必要把真实想法告诉你。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\诚恳\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\诚恳\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\诚恳\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">如果有哪里处理得不够妥当，那是我的问题，我愿意为此承担责任。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\诚恳\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\诚恳\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\诚恳\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我说的每一句话都没有夸张，只是希望事情能在清楚和尊重的前提下继续。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\诚恳\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\诚恳\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\诚恳\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Grateful</td>
+					<td style="vertical-align: middle;text-align: center">谢谢你，我工作的时候呢，不习惯吃东西的。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\感激\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\感激\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\感激\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">要没有你的支持，爸爸的工作能干的这么好吗？这是爸爸说实话，真的。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\感激\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\感激\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\感激\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">老师，如果没有您的话，我也不可能会有这样的企业。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\感激\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\感激\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\感激\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Excited</td>
+					<td style="vertical-align: middle;text-align: center">哎哟，我的妈呀，真是暴珍天物啊。那个松饼已经涂满了蜂密蛋糕，插上了蜡烛，红烧肉，掺满了卤汁，一天一口都没吃。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\激动\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\激动\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\激动\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">对我来说，这一刻比你想象得要重要得多，所以我才会这么情绪化。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\激动\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\激动\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\激动\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">康熙的意思，你赶紧过来把他挪开，没想到看爹的比他脾气还大，干嘛呢？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\激动\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\激动\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\激动\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Confused</td>
+					<td style="vertical-align: middle;text-align: center">得罪你的是我，跟韩志一点关系都没有，你干嘛？老是针对他。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\困惑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\困惑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\困惑\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">怎么这么臭？是我跟您说，我这是后半夜就熬出来了。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\困惑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\困惑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\困惑\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我就不明白他这手举这么高，是打算干嘛呀？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\困惑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\困惑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\困惑\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Conquettish</td>
+					<td style="vertical-align: middle;text-align: center">我自己也挺尴尬的，人家魏总执意邀请，我也不好拒绝嘛。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\撒娇\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\撒娇\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\撒娇\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">人家真的不是故意惹你生气的啦，只是太在乎你了，所以才会有点小情绪，你就原谅我一次嘛，好不好。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\撒娇\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\撒娇\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\撒娇\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我明明已经很乖很听话了，可你不看我一眼，我心里就酸酸的，好像被全世界冷落了一样。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\撒娇\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\撒娇\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\撒娇\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Pained</td>
+					<td style="vertical-align: middle;text-align: center">不对不对，怎么连呼吸的时候胸口都在疼，这是撞到哪儿了？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\痛苦\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\痛苦\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\痛苦\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">刚才那一下力气也太大了吧，感觉整个人都懵了一下。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\痛苦\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\痛苦\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\痛苦\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">哎呀，我怎么觉得我的头还有点晕呢？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\痛苦\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\痛苦\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\痛苦\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Disgusted</td>
+					<td style="vertical-align: middle;text-align: center">你们为什么会非提他不可，难道我们之间就没有什么可以提的吗？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\厌恶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\厌恶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\厌恶\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我不喜欢他，看你的眼神，不喜欢他挽着你的手，更不喜欢你，替他说话。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\厌恶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\厌恶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\厌恶\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">一个做过牢的诈欺犯，一个不断骗人的骗子，还故意挑选两个男人之间的对抗。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\厌恶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\厌恶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\厌恶\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Nostalgic</td>
+					<td style="vertical-align: middle;text-align: center">小海好久不见，我想你想的都做梦了。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\怀念\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\怀念\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\怀念\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">那里的田埂是不是还留着熟悉的欢笑？</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\怀念\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\怀念\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\怀念\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">我依稀看见小孙孙牵着您的手走过倒浪的背影。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\怀念\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\怀念\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\怀念\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<td rowspan="3" style="vertical-align: middle;text-align: center">Relieved</td>
+					<td style="vertical-align: middle;text-align: center">刚意识到这件事真的不需要我再继续扛着的时候，我整个人都松了一下。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\解脱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\解脱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\解脱\00000000.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">之前一直没察觉，其实身体早就累了，只是心里那根弦一直绷着，不敢放。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\解脱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\解脱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\解脱\00000001.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				<tr>
+					<!-- Emotion列已在上面的行用 rowspan=3 合并，这里不需要再写 -->
+					<td style="vertical-align: middle;text-align: center">不是失落，是那种不用再反复盘算，不用再担心下一步的空。</td>
+					
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_clap\解脱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy2\解脱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+					<td style="vertical-align : middle;text-align:center;"><audio controls="controls" style="width: 180px;"><source src="emotion_audio\emotion_27_woman_cosy3\解脱\00000002.wav" autoplay/>Your browser does not support the audio element.</audio></td>
+				</tr>
+				
+				</thead>
+				<tbody>
+
+				</tbody>
+			</table>
+		</div>
+</div>
+
+</article>
+</main>
+</div>
+
+</body>
+
+</script>
+</html>
